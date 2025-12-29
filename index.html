@@ -103,18 +103,35 @@
         select option { background-color: #1f2937; color: #ffffff; padding: 10px; }
         select:hover, button:hover { border-color: var(--text-muted); background: rgba(255,255,255,0.06); }
         
-        .btn-primary {
-            background: var(--accent);
-            border-color: var(--accent);
-            font-weight: 600;
-            color: white;
-            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+        /* PREMIUM BUTTON STYLING (Flowing Gradient Border) */
+        @keyframes borderFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
+
+        .btn-primary {
+            position: relative;
+            background: var(--bg-panel); /* Dark center */
+            color: white;
+            font-weight: 600;
+            /* The Border Trick */
+            border: double 2px transparent;
+            border-radius: 8px;
+            background-image: linear-gradient(var(--bg-panel), var(--bg-panel)), 
+                              linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            background-size: 200% 200%;
+            animation: borderFlow 3s linear infinite;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.15);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
         .btn-primary:hover { 
-            background: var(--accent-hover);
-            border-color: var(--accent-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+            filter: brightness(1.1);
         }
         .btn-primary:active { transform: translateY(0); }
 
@@ -334,14 +351,88 @@
         .tab-btn {
             background: none; border: none; color: var(--text-muted);
             font-weight: 600; cursor: pointer; padding: 8px 16px; border-radius: 6px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
         }
-        .tab-btn.active { background: rgba(255,255,255,0.1); color: white; }
+        .tab-btn:hover {
+            background: rgba(255,255,255,0.05);
+            transform: translateY(-2px);
+            color: #fff;
+        }
+        .tab-btn.active { 
+            background: rgba(255,255,255,0.1); 
+            color: white; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        /* Content Fade Animation */
+        .fade-in {
+            animation: fadeInContent 0.4s ease;
+        }
+        @keyframes fadeInContent {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Footer Credit Animation (Gradient Text) */
+        .footer-credit {
+            margin-top: auto; padding-top: 20px; 
+            border-top: 1px solid var(--border); 
+            text-align: center; font-size: 0.75rem; color: var(--text-muted);
+            animation: slideUpFade 0.8s ease-out forwards;
+            opacity: 0; transform: translateY(10px);
+        }
+        
+        @keyframes textFlow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        .footer-credit a {
+            position: relative;
+            text-decoration: none; font-weight: 700;
+            background: linear-gradient(90deg, #3b82f6, #ec4899, #10b981, #3b82f6);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: textFlow 3s linear infinite;
+            display: inline-block; 
+            transition: all 0.3s ease;
+        }
+        .footer-credit a:hover {
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            transform: scale(1.05);
+        }
+        @keyframes slideUpFade {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         textarea {
             width: 100%; height: 250px; background: rgba(0,0,0,0.3);
             border: 1px solid var(--border); color: #d1d5db;
             font-family: 'Monaco', monospace; padding: 16px;
             border-radius: 12px; margin: 0 0 20px 0; resize: none;
             font-size: 0.85rem; line-height: 1.5;
+        }
+
+        /* Buy Me A Coffee Widget Animation */
+        #bmc-wbtn {
+            border: 3px solid transparent !important;
+            border-radius: 50px !important;
+            /* Match the widget background color #FF813F for the inner layer */
+            background-image: linear-gradient(#FF813F, #FF813F), 
+                              linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6) !important;
+            background-origin: border-box !important;
+            background-clip: padding-box, border-box !important;
+            background-size: 200% 200% !important;
+            animation: borderFlow 3s linear infinite !important;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4) !important;
+            transition: transform 0.3s !important;
+        }
+        #bmc-wbtn:hover {
+            transform: scale(1.05) !important;
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.6) !important;
         }
 
     </style>
@@ -469,6 +560,10 @@
                 </select>
                 <button class="btn-primary" style="background: #2563eb;" onclick="showExport()">Export Theme</button>
             </div>
+        </div>
+
+        <div class="footer-credit">
+            Powered by <a href="https://www.webfxgen.in/" target="_blank">WebFXGen</a>
         </div>
     </aside>
 
@@ -858,7 +953,21 @@
         // --- EXPORT ---
         let currentExportMode = 'json';
         function showExport() { document.getElementById('exportModal').classList.add('open'); generateExportContent(); }
-        function switchExport(mode, btn) { currentExportMode = mode; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); generateExportContent(); }
+        
+        function switchExport(mode, btn) { 
+            currentExportMode = mode; 
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
+            btn.classList.add('active'); 
+            
+            // Trigger Animation
+            const txt = document.getElementById('exportOutput');
+            txt.classList.remove('fade-in');
+            void txt.offsetWidth; // Force reflow
+            txt.classList.add('fade-in');
+            
+            generateExportContent(); 
+        }
+        
         function generateExportContent() {
             const txt = document.getElementById('exportOutput');
             if(currentExportMode === 'json') {
@@ -875,5 +984,8 @@
 
         init();
     </script>
+
+    <!-- Buy Me A Coffee Widget -->
+    <script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="webfxgen" data-description="Support me on Buy me a coffee!" data-message="Thank you for your support." data-color="#FF813F" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
 </body>
 </html>
